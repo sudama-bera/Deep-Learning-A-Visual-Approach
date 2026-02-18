@@ -62,11 +62,6 @@ Page 112, caption to Figure 4.31
     Append to the end of the caption, "To make the bars
     read clearly, each graph has its own vertical scale."
 
-Page 145, second paragraph  
-  Arturo Nereu, 20 July 2023
-    Delete repeated "this" in "Where is the coffee located 
-    in this this mixture?".
-    
 Page 125, third paragraph
   Shanmuganathan Raman, 15 February 2022
   Gianni Errera, 12 June 2022
@@ -74,6 +69,11 @@ Page 125, third paragraph
     Replace the sentence "In the same way..." with
     "By the same logic, if we want to find larger values when 
     the derivative is positive, we move to the left."
+
+Page 145, second paragraph  
+  Arturo Nereu, 20 July 2023
+    Delete repeated "this" in "Where is the coffee located 
+    in this this mixture?".
 
 Page 212, third paragraph
   Christoph Thomas, 22 June 2023
