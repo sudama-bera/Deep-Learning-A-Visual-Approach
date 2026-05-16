@@ -1,4 +1,5 @@
 import express, { type Response } from "express";
+import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
 import { requireAuth, signToken, type AuthedRequest, hashPassword, verifyPassword } from "./auth.js";
 import {
@@ -12,7 +13,6 @@ import {
   type Role
 } from "./db.js";
 import { hasMinimumRole } from "./authz.js";
-import { createInMemoryRateLimiter } from "./rateLimit.js";
 
 const registerBodySchema = z.object({
   email: z.string().email(),
@@ -65,15 +65,17 @@ async function requireWorkspaceRole(
 
 export function createRouter(): express.Router {
   const router = express.Router();
-  const authRateLimit = createInMemoryRateLimiter({
+  const authRateLimit = rateLimit({
     windowMs: 60_000,
     max: 20,
-    keyPrefix: "auth"
+    standardHeaders: true,
+    legacyHeaders: false
   });
-  const apiRateLimit = createInMemoryRateLimiter({
+  const apiRateLimit = rateLimit({
     windowMs: 60_000,
     max: 120,
-    keyPrefix: "api"
+    standardHeaders: true,
+    legacyHeaders: false
   });
 
   router.get("/health", (_req, res) => {

@@ -14,6 +14,8 @@ Node.js + TypeScript backend with:
 1. Ensure PostgreSQL and Redis are running.
 2. Copy environment file:
    - `cp .env.example .env`
+   - Set a strong `JWT_SECRET` (32+ characters)
+   - Set `CORS_ORIGINS` to your allowed client origin(s), comma-separated if multiple
 3. Install dependencies:
    - `npm install`
 4. Run in dev mode:

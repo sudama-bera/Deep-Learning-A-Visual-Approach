@@ -5,6 +5,7 @@ import type { Express } from "express";
 import { verifyToken } from "./auth.js";
 import { getDocument, getMembership } from "./db.js";
 import { hasMinimumRole } from "./authz.js";
+import { env } from "./config.js";
 import {
   clearDocumentPresence,
   createRedisClients,
@@ -44,7 +45,7 @@ export async function createRealtimeServer(app: Express): Promise<{ httpServer: 
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
-      origin: "*"
+      origin: env.CORS_ORIGINS
     }
   });
 

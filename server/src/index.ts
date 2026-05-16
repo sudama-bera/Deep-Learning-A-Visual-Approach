@@ -9,7 +9,7 @@ async function main(): Promise<void> {
   await initDb();
 
   const app = express();
-  app.use(cors());
+  app.use(cors({ origin: env.CORS_ORIGINS }));
   app.use(express.json());
   app.use(createRouter());
 
