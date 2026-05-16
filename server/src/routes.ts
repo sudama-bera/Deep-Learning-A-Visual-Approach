@@ -12,6 +12,7 @@ import {
   type Role
 } from "./db.js";
 import { hasMinimumRole } from "./authz.js";
+import { createInMemoryRateLimiter } from "./rateLimit.js";
 
 const registerBodySchema = z.object({
   email: z.string().email(),
@@ -64,12 +65,22 @@ async function requireWorkspaceRole(
 
 export function createRouter(): express.Router {
   const router = express.Router();
+  const authRateLimit = createInMemoryRateLimiter({
+    windowMs: 60_000,
+    max: 20,
+    keyPrefix: "auth"
+  });
+  const apiRateLimit = createInMemoryRateLimiter({
+    windowMs: 60_000,
+    max: 120,
+    keyPrefix: "api"
+  });
 
   router.get("/health", (_req, res) => {
     res.json({ ok: true });
   });
 
-  router.post("/auth/register", async (req, res) => {
+  router.post("/auth/register", authRateLimit, async (req, res) => {
     const parsed = registerBodySchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -92,7 +103,7 @@ export function createRouter(): express.Router {
     res.status(201).json({ token, user });
   });
 
-  router.post("/auth/login", async (req, res) => {
+  router.post("/auth/login", authRateLimit, async (req, res) => {
     const parsed = loginBodySchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -118,11 +129,11 @@ export function createRouter(): express.Router {
     res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
   });
 
-  router.get("/me", requireAuth, (req: AuthedRequest, res) => {
+  router.get("/me", apiRateLimit, requireAuth, (req: AuthedRequest, res) => {
     res.json({ user: req.auth });
   });
 
-  router.post("/workspaces", requireAuth, async (req: AuthedRequest, res) => {
+  router.post("/workspaces", apiRateLimit, requireAuth, async (req: AuthedRequest, res) => {
     const parsed = createWorkspaceSchema.safeParse(req.body);
 
     if (!parsed.success) {
@@ -134,7 +145,7 @@ export function createRouter(): express.Router {
     res.status(201).json({ workspace });
   });
 
-  router.post("/workspaces/:workspaceId/members", requireAuth, async (req: AuthedRequest, res) => {
+  router.post("/workspaces/:workspaceId/members", apiRateLimit, requireAuth, async (req: AuthedRequest, res) => {
     const workspaceId = parseId(String(req.params.workspaceId));
     const body = addMemberSchema.safeParse(req.body);
 
@@ -159,7 +170,7 @@ export function createRouter(): express.Router {
     res.status(204).send();
   });
 
-  router.post("/workspaces/:workspaceId/documents", requireAuth, async (req: AuthedRequest, res) => {
+  router.post("/workspaces/:workspaceId/documents", apiRateLimit, requireAuth, async (req: AuthedRequest, res) => {
     const workspaceId = parseId(String(req.params.workspaceId));
     const body = createDocumentSchema.safeParse(req.body);
 
@@ -177,7 +188,7 @@ export function createRouter(): express.Router {
     res.status(201).json({ document });
   });
 
-  router.get("/workspaces/:workspaceId/documents/:documentId", requireAuth, async (req: AuthedRequest, res) => {
+  router.get("/workspaces/:workspaceId/documents/:documentId", apiRateLimit, requireAuth, async (req: AuthedRequest, res) => {
     const workspaceId = parseId(String(req.params.workspaceId));
     const documentId = parseId(String(req.params.documentId));
 
